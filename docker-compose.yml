@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  postgres_techlog:
+    build: 
+      context: .
+      args:
+        POSTGRES_VERSION: 17  
+    container_name: postgres_techlog
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: postgres
+      TZ: America/Sao_Paulo
+    ports:
+      - 5432:5432 
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - techlog-vol:/var/lib/postgresql/data
+    networks:
+      - techlog-net
+    command: >
+      postgres -c listen_addresses=127.0.0.1 
+      
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      
+volumes:
+  techlog-vol: 
+    external: true
+
+networks: 
+  techlog-net:
+    external: true
